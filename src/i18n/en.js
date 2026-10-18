@@ -10,6 +10,7 @@ export const en = {
     parent: 'DownWise — Smart Download',
     original: 'Download original file',
     convertTo: 'Download as {format}',
+    captureFrame: 'Save frame as {format}',
   },
 
   popup: {
@@ -93,6 +94,8 @@ export const en = {
   notes: {
     animatedImage: 'Animated image — only the first frame is saved.',
     jpegFlatten: 'Transparent areas become white in JPEG.',
+    frameCapture: 'One video frame was captured as a still image.',
+    webmRealtime: 'WebM/Opus encoding records in real time, so this took as long as the audio.',
   },
 
   options: {
@@ -119,6 +122,14 @@ export const en = {
     download: {
       quality: 'JPEG/WebP conversion quality',
       qualityHint: 'Higher quality means larger files; no effect on PNG.',
+      defaultImageTarget: 'Preferred image format',
+      defaultImageTargetDesc: 'This format is listed first in the right-click menu for images and videos.',
+      audioBitrate: 'WebM (Opus) audio bitrate',
+      audioBitrateDesc: 'Bitrate for compressed audio conversion; 128 kbps is a good default.',
+      saveAs: 'Ask where to save each file',
+      saveAsDesc: 'On: Chrome asks for a location every time. Off: files go to the default folder automatically.',
+      contextMenus: 'DownWise in the right-click menu',
+      contextMenusDesc: 'Turn off to remove the DownWise submenu from the browser context menu.',
       notifications: 'System notifications',
       notificationsDesc: 'Notify when a download finishes or fails.',
     },

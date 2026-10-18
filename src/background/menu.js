@@ -1,17 +1,35 @@
 /**
  * Context-menu construction & routing.
- * Menus are rebuilt when the user switches UI language.
+ * Menus are rebuilt when the user switches UI language, flips the
+ * context-menu toggle, or changes the preferred conversion format.
  * Only REAL conversions are offered per context type (registry is the truth).
+ *
+ * Menu item ids are namespaced per context type — `dw-fmt-video-png` —
+ * because the same output format (PNG) can be offered for several contexts
+ * and chrome.contextMenus requires globally unique ids.
  */
 import { t, DEFAULT_LANG } from '../i18n/index.js';
-import { OUTPUT_FORMATS, menuOutputsForContext } from '../converters/registry.js';
+import { OUTPUT_FORMATS, menuOutputsForContext, isFrameCapture } from '../converters/registry.js';
 
 export const MENU_ROOT_ID = 'dw-root';
 export const MENU_ORIGINAL_ID = 'dw-original';
 const MENU_FMT_PREFIX = 'dw-fmt-';
+const MENU_FMT_RE = /^dw-fmt-([a-z]+)-([a-z0-9]+)$/;
 
-export async function buildContextMenus(lang = DEFAULT_LANG) {
+const menuItemId = (contextType, formatId) => `${MENU_FMT_PREFIX}${contextType}-${formatId}`;
+
+/**
+ * @param {{ language?: string, contextMenus?: boolean, defaultImageTarget?: string }} settings
+ */
+export async function buildContextMenus(settings = {}) {
+  const lang = settings.language || DEFAULT_LANG;
+
   await chrome.contextMenus.removeAll();
+
+  // User opted out of the DownWise submenu entirely — leave it clean.
+  if (settings.contextMenus === false) return;
+
+  const preferred = settings.defaultImageTarget || '';
 
   chrome.contextMenus.create({
     id: MENU_ROOT_ID,
@@ -25,12 +43,14 @@ export async function buildContextMenus(lang = DEFAULT_LANG) {
     contexts: ['image', 'video', 'audio', 'link'],
   });
 
-  for (const contextType of ['image', 'audio']) {
-    for (const formatId of menuOutputsForContext(contextType)) {
+  for (const contextType of ['image', 'video', 'audio']) {
+    for (const formatId of menuOutputsForContext(contextType, preferred)) {
       chrome.contextMenus.create({
-        id: `${MENU_FMT_PREFIX}${formatId}`,
+        id: menuItemId(contextType, formatId),
         parentId: MENU_ROOT_ID,
-        title: t(lang, 'menu.convertTo', { format: OUTPUT_FORMATS[formatId].label }),
+        title: isFrameCapture(contextType, formatId)
+          ? t(lang, 'menu.captureFrame', { format: OUTPUT_FORMATS[formatId].label })
+          : t(lang, 'menu.convertTo', { format: OUTPUT_FORMATS[formatId].label }),
         contexts: [contextType],
       });
     }
@@ -41,9 +61,9 @@ export async function buildContextMenus(lang = DEFAULT_LANG) {
 export function resolveMenuAction(menuItemId) {
   const id = String(menuItemId);
   if (id === MENU_ORIGINAL_ID) return { target: 'original' };
-  if (id.startsWith(MENU_FMT_PREFIX)) {
-    const formatId = id.slice(MENU_FMT_PREFIX.length);
-    if (OUTPUT_FORMATS[formatId]) return { target: formatId };
+  const match = MENU_FMT_RE.exec(id);
+  if (match && menuOutputsForContext(match[1]).includes(match[2])) {
+    return { target: match[2] };
   }
   return null;
 }

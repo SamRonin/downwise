@@ -3,6 +3,7 @@
  * Writes are serialized (promise chain) to avoid read-modify-write races
  * between concurrent jobs. Also used read-only by the popup via messaging.
  */
+import { MSG } from './messages.js';
 
 export const ACTIVE_STATUSES = Object.freeze([
   'queued',
@@ -118,7 +119,7 @@ export async function broadcastJobs() {
   if (typeof chrome === 'undefined' || !chrome?.runtime?.sendMessage) return;
   try {
     const jobs = await listJobs();
-    chrome.runtime.sendMessage({ type: 'DW_JOBS_UPDATED', jobs }).catch(() => {});
+    chrome.runtime.sendMessage({ type: MSG.JOBS_UPDATED, jobs }).catch(() => {});
   } catch {
     /* popup not open — ignore */
   }

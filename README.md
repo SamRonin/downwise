@@ -31,10 +31,15 @@
 
 - **Smart context menu** — right-click any image, video, audio element or link and pick
   *Download original file* (smart-probed and type-enriched), or a real conversion target
-  (*Download as PNG/JPEG/WebP* on images, *Download as WAV* on audio). The menu speaks your
-  language and rebuilds itself when you switch.
+  (*Download as PNG/JPEG/WebP* on images, *Save frame as PNG/JPEG/WebP* on videos,
+  *Download as WAV/WebM (Opus)* on audio). The menu speaks your language, rebuilds itself when
+  you switch, and can be hidden entirely from Settings.
 - **Real conversions, no fakery** — every offered output is genuinely produced by Chromium's own
-  codecs or by DownWise's own encoder. A renamed file is not a conversion; DownWise never does that.
+  codecs, recorded through `MediaRecorder`, or written by DownWise's own encoder. A renamed file
+  is not a conversion; DownWise never does that.
+- **Self-cleaning offscreen worker** — the offscreen document that decodes audio and captures
+  video frames closes itself after 30 s of idle time (never while a download still reads from
+  it) and all temporary buffers, canvases and `AudioContext`s are freed after every job.
 - **HTML-response detection + smart recovery** — hotlink protection and login walls often answer
   with a *web page* instead of the file. DownWise sniffs every response (headers **and** magic
   bytes), refuses to save garbage, then looks inside the page you clicked in for better candidates
@@ -58,8 +63,9 @@ only lists formats a real encoder exists for:
 | Input (sniffed, not guessed) | Possible outputs |
 |:---|:---|
 | **Image** — PNG, JPEG, WebP, AVIF, GIF, BMP, ICO, SVG (rasterized), HEIC where Chromium decodes it | **PNG · JPEG · WebP** (quality slider applies to JPEG/WebP; SVG is rasterized with sane sizing) — or the original |
-| **Audio** — MP3, WAV, OGG/Opus, FLAC, AAC/M4A, or the audio track of MP4/WebM containers | **WAV** (16-bit PCM, decoded via Web Audio) — or the original |
-| **Video, documents (PDF/Office/EPUB…), archives (ZIP/RAR/7z…)** | **Original only** — saving the file untouched is the honest move |
+| **Audio** — MP3, WAV, OGG/Opus, FLAC, AAC/M4A, or the audio track of MP4/WebM containers | **WAV** (16-bit PCM, decoded via Web Audio) or **WebM (Opus)** (compressed, recorded with `MediaRecorder` at your chosen bitrate) — or the original |
+| **Video** (≤ 45 MB) | **One frame as PNG · JPEG · WebP** — an honest still, not a container remux |
+| **Documents (PDF/Office/EPUB…), archives (ZIP/RAR/7z…)** | **Original only** — saving the file untouched is the honest move |
 
 ### What DownWise deliberately does NOT do
 
@@ -135,12 +141,12 @@ downwise/
 │   └── icons/             # 16 → 512 px PNG icons
 ├── src/
 │   ├── background/        # Service worker: menu, fetcher, recovery, pipeline, offscreen host
-│   ├── converters/        # Registry + image/audio/WAV converters (pure + DOM paths)
-│   ├── lib/               # mime, sniff, filename, settings, jobs, errors, branding, base64
+│   ├── converters/        # Registry + image/audio/video-frame/WAV converters (pure + DOM paths)
+│   ├── lib/               # mime, sniff, filename, content-disposition, messages, task queue, settings, jobs
 │   ├── i18n/              # fa/en dictionaries + runtime switching engine
 │   ├── ui/                # popup, options, grant page (HTML/CSS/JS)
-│   └── offscreen/         # Offscreen document: SVG raster, audio decode, blob URLs
-├── tests/                 # 45 Node tests (node --test)
+│   └── offscreen/         # Offscreen document: SVG raster, audio decode, video frames, blob URLs
+├── tests/                 # 84 Node tests (node --test)
 └── docs/                  # ARCHITECTURE, INSTALL, PRIVACY + screenshots
 ```
 

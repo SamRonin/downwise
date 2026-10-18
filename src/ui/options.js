@@ -4,6 +4,7 @@
 import { getSettings, setSetting } from '../lib/settings.js';
 import { setupPage, t } from '../i18n/index.js';
 import { listJobs, ACTIVE_STATUSES } from '../lib/jobs.js';
+import { MSG } from '../lib/messages.js';
 import { icon } from './icons.js';
 import { applyTheme } from './theme.js';
 import { VERSION, REPO_URL, ISSUES_URL, PRIVACY_URL } from '../lib/branding.js';
@@ -60,6 +61,19 @@ function renderQuality() {
   // RTL gradient direction flip
   const rtl = document.documentElement.dir === 'rtl';
   range.style.setProperty('--slider-dir', rtl ? 'left' : 'right');
+}
+
+function renderDownloadPrefs() {
+  // Preferred image conversion format (segmented control)
+  document.querySelectorAll('[data-image-target]').forEach((btn) => {
+    btn.classList.toggle('selected', btn.dataset.imageTarget === state.settings.defaultImageTarget);
+  });
+  // WebM/Opus bitrate
+  $('#audio-bitrate').value = String(state.settings.audioBitrate);
+  // Ask-where-to-save behaviour
+  $('#save-as-toggle').checked = state.settings.saveAs === 'ask';
+  // Context-menu visibility
+  $('#context-menus-toggle').checked = Boolean(state.settings.contextMenus);
 }
 
 async function renderPermissions() {
@@ -134,6 +148,34 @@ function bindControls() {
     toast(t(state.lang, 'options.saved'));
   });
 
+  document.querySelectorAll('[data-image-target]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      state.settings.defaultImageTarget = btn.dataset.imageTarget;
+      renderDownloadPrefs();
+      await setSetting('defaultImageTarget', state.settings.defaultImageTarget);
+      toast(t(state.lang, 'options.saved'));
+    });
+  });
+
+  $('#audio-bitrate').addEventListener('change', async (e) => {
+    const val = Number(e.target.value);
+    state.settings.audioBitrate = val;
+    await setSetting('audioBitrate', val);
+    toast(t(state.lang, 'options.saved'));
+  });
+
+  $('#save-as-toggle').addEventListener('change', async (e) => {
+    state.settings.saveAs = e.target.checked ? 'ask' : 'auto';
+    await setSetting('saveAs', state.settings.saveAs);
+    toast(t(state.lang, 'options.saved'));
+  });
+
+  $('#context-menus-toggle').addEventListener('change', async (e) => {
+    state.settings.contextMenus = e.target.checked;
+    await setSetting('contextMenus', state.settings.contextMenus);
+    toast(t(state.lang, 'options.saved'));
+  });
+
   $('#notifications-toggle').addEventListener('change', async (e) => {
     state.settings.notifications = e.target.checked;
     await setSetting('notifications', state.settings.notifications);
@@ -156,7 +198,7 @@ function bindControls() {
 
   $('#btn-clear-history').addEventListener('click', async () => {
     try {
-      await chrome.runtime.sendMessage({ type: 'DW_CLEAR_HISTORY' });
+      await chrome.runtime.sendMessage({ type: MSG.CLEAR_HISTORY });
       await renderHistory();
       toast(t(state.lang, 'options.history.cleared'));
     } catch { /* ignore */ }
@@ -185,6 +227,7 @@ async function init() {
   renderThemeChoice();
   renderLangChoice();
   renderQuality();
+  renderDownloadPrefs();
   renderLinks();
   await renderPermissions();
   await renderHistory();

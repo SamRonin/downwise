@@ -86,9 +86,65 @@ Initial release. 🎉
   no-build, no-remote-code stance.
 - No HLS (`.m3u8`), DASH (`.mpd`) or MSE streams — segment playlists cannot be merged into a
   playable file without remuxing, and MediaSource `blob:` URLs cannot be re-fetched.
-- 250 MB hard cap per fetched file; 30 MB for image conversions and 50 MB for audio conversions
-  (converted payloads cross an internal base64 bridge).
+- 250 MB hard cap per fetched file; 30 MB for image conversions and 45 MB for audio/video-frame
+  conversions (converted payloads cross an internal base64 bridge).
 - Animated images convert only their first frame (the UI tells you when this happens).
 - Requires Chrome/Chromium 116+ (`chrome.runtime.getContexts` and `chrome.offscreen`).
+
+### Updated in place (same release, hardened & expanded)
+
+**Offscreen document lifecycle & memory hygiene**
+
+- The offscreen document is now closed automatically after **30 s of idle time**
+  (`chrome.offscreen.closeDocument()`) and transparently re-created on demand. "Idle" means zero
+  in-flight conversion calls **and** zero downloads still reading an offscreen-created blob URL
+  (tracked by a dedicated blob-URL registry) — so auto-closing can never kill a running transfer.
+- `chrome.runtime.onSuspend` performs a final idle sweep; blob URLs are revoked on completion,
+  cancellation and download-start failure.
+- All temporary media resources are freed deterministically after every conversion: object URLs
+  (`URL.revokeObjectURL`), `AudioContext.close()` + source disconnect + stream-track stops after
+  MediaRecorder runs, canvas backing stores zeroed after frame capture, and `<video>` elements
+  reset via `removeAttribute('src')` + `load()`.
+- New zero-dependency **concurrency queue** (`src/lib/task-queue.js`): heavy conversions run two
+  at a time (blob-URL hand-offs are serialized) so several simultaneous right-click conversions
+  can no longer stack decode buffers and crash renderer memory.
+
+**Converters**
+
+- Audio → **WebM (Opus)** alongside WAV: recorded with the browser's own `MediaRecorder`
+  (zero npm dependencies), with a user-selectable bitrate (64/96/128/192/256 kbps, default 128).
+- Video → **PNG / JPEG / WebP frame capture** (Poster): the offscreen document seeks the video,
+  rasterizes one frame on canvas and frees everything afterwards. Menu items are labelled
+  *"Save frame as …"* — honest stills, never a container remux.
+- Magic-byte sniffing hardened: HEIC/HEIF brand families (`heic/heix/hevc/…`), AVIF detection
+  through compatible brands inside HEIF containers, M4A/M4B/M4P audio containers, and a validated
+  MP3 frame-sync check (layer + bitrate bits) that rejects lookalike garbage. Truncated headers
+  never throw.
+- `Content-Disposition` support: the real filename (quoted, RFC 5987 `filename*` with UTF-8
+  percent-decoding, legacy RFC 2047 encoded-words) now overrides the URL tail when servers
+  reveal it — including path-stripping and control-character cleanup.
+
+**Refactoring**
+
+- Every runtime message type lives in one frozen catalogue (`src/lib/messages.js`); the service
+  worker and offscreen routers are generated from it (`createRouter`) — no duplicated
+  `onMessage` boilerplate, no raw string literals scattered in the code.
+- Font loading is subsetted at the CSS level with `unicode-range`: Persian pages no longer
+  download Inter and English pages no longer download Vazirmatn (the woff2 binaries stay
+  untouched — no build step; see `docs/FONTS.md`).
+
+**Settings (options page)**
+
+- Preferred image conversion format (WebP/PNG/JPEG) — hoisted to the top of the context menu.
+- Download behaviour: *ask where to save each file* vs. silent auto-save (per-download `saveAs`).
+- Toggle to remove the DownWise submenu from the browser context menu entirely.
+- WebM (Opus) bitrate selector for compressed audio output.
+
+**Tests**
+
+- 84 unit tests (`node --test`), now also covering: Content-Disposition filename extraction
+  (quoted / `filename*` / RFC 2047 / paths / dotfiles), the concurrency queue (limit, ordering,
+  error isolation), the message catalogue (frozen, unique, prefix-safe) and the extended magic
+  bytes (HEIC/AVIF/MP3/WebM, truncated buffers). ESLint flat config stays clean.
 
 [1.0.0]: https://github.com/SamRonin/downwise/releases/tag/v1.0.0

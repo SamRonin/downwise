@@ -8,28 +8,45 @@ import { handleMenuClick, retryJob, registerDownloadWatchers, registerNotificati
 import { getSettings, onSettingsChanged } from '../lib/settings.js';
 import { listJobs, removeJob, clearFinishedJobs, broadcastJobs } from '../lib/jobs.js';
 import { ACTIVE_STATUSES } from '../lib/jobs.js';
+import { MSG, createRouter } from '../lib/messages.js';
+import { closeOffscreenIfIdle, teardownOffscreen } from './offscreen-host.js';
 
 /* ------------------------------------------------------------- bootstrap */
 
-chrome.runtime.onInstalled.addListener(async () => {
+async function rebuildMenusFromSettings() {
   const settings = await getSettings();
-  await buildContextMenus(settings.language);
+  await buildContextMenus(settings);
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+  rebuildMenusFromSettings().catch(() => {});
 });
 
-chrome.runtime.onStartup.addListener(async () => {
-  const settings = await getSettings();
-  await buildContextMenus(settings.language);
+chrome.runtime.onStartup.addListener(() => {
+  rebuildMenusFromSettings().catch(() => {});
 });
 
+// Rebuild the menus when language, context-menu toggle or the preferred
+// conversion format changes. Nothing else can affect the menu tree.
 onSettingsChanged((changes) => {
-  if (changes.language && typeof changes.language.newValue === 'string') {
-    buildContextMenus(changes.language.newValue).catch(() => {});
+  const relevant = ['language', 'contextMenus', 'defaultImageTarget'];
+  if (relevant.some((key) => changes[key])) {
+    rebuildMenusFromSettings().catch(() => {});
   }
 });
 
 registerMenuHandlers(handleMenuClick);
 registerDownloadWatchers();
 registerNotificationClicks();
+
+// Best-effort cleanup when the worker is being shut down: the idle closer
+// refuses to close while downloads still read offscreen blob URLs.
+if (chrome.runtime?.onSuspend?.addListener) {
+  chrome.runtime.onSuspend.addListener(() => {
+    closeOffscreenIfIdle().catch(() => {});
+    teardownOffscreen().catch(() => {});
+  });
+}
 
 /**
  * Minimal debug handle on the worker global — usable from
@@ -48,55 +65,37 @@ async function hasAllHostAccess() {
   }
 }
 
-chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-  const type = msg?.type;
+const WORKER_HANDLERS = Object.freeze({
+  // Synchronous-shaped handlers return their payload; the router wraps it.
+  [MSG.PING]: () => ({ pong: true }),
 
-  if (type === 'DW_PING') {
-    sendResponse({ ok: true, pong: true });
-    return false;
-  }
+  [MSG.GET_STATE]: async () => {
+    const [jobs, settings, hostAccess] = await Promise.all([
+      listJobs(),
+      getSettings(),
+      hasAllHostAccess(),
+    ]);
+    return { jobs, settings, hostAccess };
+  },
 
-  if (type === 'DW_GET_STATE') {
-    (async () => {
-      const [jobs, settings, hostAccess] = await Promise.all([
-        listJobs(),
-        getSettings(),
-        hasAllHostAccess(),
-      ]);
-      sendResponse({ ok: true, jobs, settings, hostAccess });
-    })().catch((err) => sendResponse({ ok: false, message: err?.message }));
-    return true; // async
-  }
+  [MSG.RETRY]: async (msg) => ({ ok: Boolean(await retryJob(msg.jobId)) }),
 
-  if (type === 'DW_RETRY') {
-    retryJob(msg.jobId).then((ok) => sendResponse({ ok })).catch(() => sendResponse({ ok: false }));
-    return true;
-  }
+  [MSG.REMOVE_JOB]: async (msg) => {
+    const jobs = await listJobs();
+    const target = jobs.find((j) => j.id === msg.jobId);
+    if (target && !ACTIVE_STATUSES.includes(target.status)) {
+      await removeJob(msg.jobId);
+    }
+    await broadcastJobs();
+    return {};
+  },
 
-  if (type === 'DW_REMOVE_JOB') {
-    (async () => {
-      const jobs = await listJobs();
-      const target = jobs.find((j) => j.id === msg.jobId);
-      if (target && !ACTIVE_STATUSES.includes(target.status)) {
-        await removeJob(msg.jobId);
-      }
-      await broadcastJobs();
-      sendResponse({ ok: true });
-    })().catch(() => sendResponse({ ok: false }));
-    return true;
-  }
-
-  if (type === 'DW_CLEAR_HISTORY') {
-    clearFinishedJobs()
-      .then(async (count) => {
-        await broadcastJobs();
-        await updateBadge();
-        sendResponse({ ok: true, count });
-      })
-      .catch(() => sendResponse({ ok: false }));
-    return true;
-  }
-
-  // DW_OFFSCREEN_* messages belong to the offscreen document — ignored here.
-  return false;
+  [MSG.CLEAR_HISTORY]: async () => {
+    const count = await clearFinishedJobs();
+    await broadcastJobs();
+    await updateBadge();
+    return { count };
+  },
 });
+
+chrome.runtime.onMessage.addListener(createRouter(WORKER_HANDLERS));

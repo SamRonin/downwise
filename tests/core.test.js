@@ -25,11 +25,20 @@ test('base64 round-trips binary', () => {
   assert.deepEqual([...decoded], [...original]);
 });
 
-test('settings defaults are Persian-first', () => {
+test('settings defaults are Persian-first and privacy-friendly', () => {
   assert.equal(DEFAULT_SETTINGS.language, 'fa');
   assert.deepEqual(LANGUAGES, ['fa', 'en']);
   assert.equal(DEFAULT_SETTINGS.theme, 'auto');
   assert.ok(DEFAULT_SETTINGS.quality > 0.5 && DEFAULT_SETTINGS.quality <= 1);
+  // New preference defaults
+  assert.equal(DEFAULT_SETTINGS.defaultImageTarget, 'webp');
+  assert.equal(DEFAULT_SETTINGS.audioBitrate, 128);
+  assert.equal(DEFAULT_SETTINGS.saveAs, 'auto');       // silent save by default
+  assert.equal(DEFAULT_SETTINGS.contextMenus, true);   // menu visible by default
+});
+
+test('audio bitrate steps cover the supported Opus range', () => {
+  assert.ok(DEFAULT_SETTINGS.audioBitrate >= 64 && DEFAULT_SETTINGS.audioBitrate <= 320);
 });
 
 test('wav output mime is audio/wav (honest extension pairing)', () => {

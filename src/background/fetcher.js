@@ -8,6 +8,7 @@
 import { DownWiseError } from '../lib/errors.js';
 import { normalizeMime } from '../lib/mime.js';
 import { sniffType } from '../lib/sniff.js';
+import { filenameFromContentDisposition } from '../lib/content-disposition.js';
 
 export const MAX_BYTES = 250 * 1024 * 1024; // hard cap for any single fetch
 
@@ -81,7 +82,7 @@ function assertNotHtml(mime, bytes, url) {
 
 /**
  * Fetch a complete resource.
- * @returns {{ bytes: Uint8Array, mime: string, sniffed: object|null, finalUrl: string, size: number }}
+ * @returns {{ bytes: Uint8Array, mime: string, sniffed: object|null, finalUrl: string, size: number, suggestedName: string|null }}
  */
 export async function fetchResource(url, { onProgress, maxBytes = MAX_BYTES, credentials = 'include' } = {}) {
   let res;
@@ -96,6 +97,7 @@ export async function fetchResource(url, { onProgress, maxBytes = MAX_BYTES, cre
   const mime = normalizeMime(res.headers.get('content-type') || '');
   const bytes = await readBody(res, { onProgress, maxBytes });
   const sniffed = assertNotHtml(mime, bytes, res.url);
+  const suggestedName = filenameFromContentDisposition(res.headers.get('content-disposition'));
 
   return {
     bytes,
@@ -103,6 +105,7 @@ export async function fetchResource(url, { onProgress, maxBytes = MAX_BYTES, cre
     sniffed,
     finalUrl: res.url || url,
     size: bytes.length,
+    suggestedName,
   };
 }
 
@@ -138,6 +141,7 @@ export async function probeResource(url) {
       stream: sniffed?.kind === 'stream',
       mime: sniffed?.mime || mime,
       sniffed,
+      suggestedName: filenameFromContentDisposition(res.headers.get('content-disposition')),
       url: res.url || url,
     };
   } catch {

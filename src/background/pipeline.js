@@ -6,7 +6,7 @@
 import {
   createJob, updateJob, getJob, listJobs, broadcastJobs, ACTIVE_STATUSES,
 } from '../lib/jobs.js';
-import { getSettings } from '../lib/settings.js';
+import { getSettings, saveAsFlag } from '../lib/settings.js';
 import { baseNameFromUrl, sanitizeFilename, replaceExtension } from '../lib/filename.js';
 import {
   mimeFromExt, kindFromMime, extFromUrl, isStreamManifestUrl, supportedScheme,
@@ -19,15 +19,15 @@ import { base64ToBytes } from '../lib/base64.js';
 import { fetchResource, probeResource, hasHostAccess } from './fetcher.js';
 import { findPageCandidates, pageFetch } from './recovery.js';
 import { makeBlobUrl, revokeBlobUrl } from './offscreen-host.js';
+import { trackBlobDownload, releaseBlobDownload, discardBlobUrl } from './blob-urls.js';
 import { convertFile, CONVERSION_SIZE_LIMITS } from '../converters/index.js';
-import { OUTPUT_FORMATS } from '../converters/registry.js';
+import { OUTPUT_FORMATS, isFrameCapture } from '../converters/registry.js';
 
 const ICON_URL = 'assets/icons/icon-128.png';
 const BADGE_COUNT_COLOR = '#0D9488';
 const BADGE_OK_COLOR = '#10B981';
 const BADGE_FAIL_COLOR = '#F43F5E';
 
-const blobUrlsByDownload = new Map(); // downloadId → { url, kind } entry to revoke
 const notifToDownload = new Map();    // notificationId → downloadId
 
 /* ------------------------------------------------------------------ badge */
@@ -156,8 +156,7 @@ export async function retryJob(jobId) {
   if (!job) return false;
   // Retry is for finished jobs AND permission-blocked jobs (after granting
   // access from the popup). Actively-processing jobs cannot be re-queued.
-  const busy = ['queued', 'preparing', 'fetching', 'converting', 'saving', 'downloading'];
-  if (busy.includes(job.status)) return false;
+  if (ACTIVE_STATUSES.includes(job.status) && job.status !== 'action_required') return false;
   await updateJob(jobId, { status: 'queued', progress: 0, errorCode: null, errorStatus: null, finishedAt: null });
   void runJob(jobId);
   return true;
@@ -193,6 +192,7 @@ async function directDownload(job, url) {
     url,
     filename: job.name || undefined,
     conflictAction: 'uniquify',
+    saveAs: saveAsFlag(await getSettings()),
   });
   await trackDownload(job.id, downloadId);
   return { downloadId };
@@ -225,11 +225,8 @@ async function setDownloadingUnlessFinal(jobId, downloadId) {
 
 /** Shared completion logic (used by onChanged and trackDownload). */
 async function finalizeCompleted(jobId, downloadId) {
-  const saved = blobUrlsByDownload.get(downloadId);
-  if (saved) {
-    await revokeBlobUrl(saved);
-    blobUrlsByDownload.delete(downloadId);
-  }
+  const saved = releaseBlobDownload(downloadId);
+  if (saved) await revokeBlobUrl(saved);
   const job = await getJob(jobId);
   if (!job || ['completed', 'failed', 'canceled'].includes(job.status)) return;
   let item = null;
@@ -292,6 +289,10 @@ async function runOriginal(job) {
   if (probe.sniffed) {
     await updateJob(job.id, { kind: probe.sniffed.kind, mime: probe.sniffed.mime });
   }
+  // Servers often send the real filename via Content-Disposition.
+  if (probe.suggestedName) {
+    await updateJob(job.id, { name: sanitizeFilename(probe.suggestedName) });
+  }
 
   const fresh = (await getJob(job.id)) || job; // pick up recovered name/url
   await directDownload(fresh, url);
@@ -322,6 +323,7 @@ async function runConversion(job, settings, lang) {
   let mime = '';
   let sniffed = null;
   let finalUrl = job.url;
+  let headerName = null;
 
   if (job.url.startsWith('blob:')) {
     await updateJob(job.id, { status: 'fetching', progress: null });
@@ -342,10 +344,11 @@ async function runConversion(job, settings, lang) {
     try {
       const r = await fetchResource(job.url, { onProgress: progressReporter(job.id) });
       bytes = r.bytes; mime = r.mime; sniffed = r.sniffed; finalUrl = r.finalUrl;
+      headerName = r.suggestedName || null;
     } catch (err) {
       const e = toDownWiseError(err);
       if (e.code === 'HTML_RESPONSE') {
-        ({ bytes, mime, sniffed, finalUrl } = await recoverAndFetch(job, job.kind, progressReporter(job.id)));
+        ({ bytes, mime, sniffed, finalUrl, suggestedName: headerName } = await recoverAndFetch(job, job.kind, progressReporter(job.id)));
       } else if (e.code === 'CORS') {
         try {
           const r = await pageFetch(tabId, frameId, job.url);
@@ -372,7 +375,9 @@ async function runConversion(job, settings, lang) {
   const sourceMime = sniffed?.mime || mime || 'application/octet-stream';
 
   if (sourceKind === 'stream') throw new DownWiseError('UNSUPPORTED_STREAM', { url: finalUrl });
-  if (fmt.kind === 'image' && sourceKind !== 'image') throw new DownWiseError('KIND_MISMATCH', { url: finalUrl });
+  if (fmt.kind === 'image' && sourceKind !== 'image' && sourceKind !== 'video') {
+    throw new DownWiseError('KIND_MISMATCH', { url: finalUrl });
+  }
   if (fmt.kind === 'audio' && sourceKind !== 'audio') throw new DownWiseError('KIND_MISMATCH', { url: finalUrl });
 
   const cap = CONVERSION_SIZE_LIMITS[sourceKind] || CONVERSION_SIZE_LIMITS.image;
@@ -391,14 +396,21 @@ async function runConversion(job, settings, lang) {
     bytes,
     { mime: sourceMime, kind: sourceKind, isSvg: sniffed?.ext === 'svg' },
     job.target,
-    { quality: settings.quality },
+    {
+      quality: settings.quality,
+      bitrateKbps: settings.audioBitrate,
+    },
   );
 
   let note = null;
-  if (sniffed?.ext === 'gif') note = 'notes.animatedImage';
+  if (isFrameCapture(sourceKind, job.target)) note = 'notes.frameCapture';
+  else if (sniffed?.ext === 'gif') note = 'notes.animatedImage';
   else if (job.target === 'jpeg' && ['png', 'webp', 'svg'].includes(sniffed?.ext)) note = 'notes.jpegFlatten';
+  else if (job.target === 'webm') note = 'notes.webmRealtime';
 
-  const filename = sanitizeFilename(replaceExtension(baseNameFromUrl(finalUrl), fmt.ext));
+  // Content-Disposition name wins for the base, then the URL tail.
+  const baseName = sanitizeFilename(headerName || baseNameFromUrl(finalUrl));
+  const filename = sanitizeFilename(replaceExtension(baseName, fmt.ext));
 
   await updateJob(job.id, {
     status: 'saving',
@@ -419,12 +431,16 @@ async function runConversion(job, settings, lang) {
       url: saved.url,
       filename,
       conflictAction: 'uniquify',
+      saveAs: saveAsFlag(settings),
     });
+    if (saved.kind === 'blob') trackBlobDownload(downloadId, saved);
   } catch (err) {
-    await revokeBlobUrl(saved); // don't leak the offscreen blob URL
+    if (saved.kind === 'blob') {
+      discardBlobUrl(saved.url);   // stop pinning the offscreen document
+      await revokeBlobUrl(saved);  // don't leak the offscreen blob URL
+    }
     throw err;
   }
-  if (saved.kind === 'blob') blobUrlsByDownload.set(downloadId, saved);
   await trackDownload(job.id, downloadId);
   await broadcastJobs();
 }
@@ -446,11 +462,8 @@ export function registerDownloadWatchers() {
     if (delta.state.current === 'complete') {
       await finalizeCompleted(job.id, delta.id);
     } else if (delta.state.current === 'interrupted') {
-      const saved = blobUrlsByDownload.get(delta.id);
-      if (saved) {
-        await revokeBlobUrl(saved);
-        blobUrlsByDownload.delete(delta.id);
-      }
+      const saved = releaseBlobDownload(delta.id);
+      if (saved) await revokeBlobUrl(saved);
       const canceled = delta.error?.current === 'USER_CANCELED';
       await updateJob(job.id, {
         status: canceled ? 'canceled' : 'failed',

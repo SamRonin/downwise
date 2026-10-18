@@ -1,7 +1,9 @@
 /**
  * Content sniffing via magic bytes + text heuristics.
  * Lets DownWise trust what a file *is* rather than what headers/URLs claim.
- * Pure module — also imported by Node tests.
+ * Recognizes classic formats AND modern ones (AVIF, HEIC/HEIF variants,
+ * MP3 with or without ID3, WebM/Matroska) before a download dam is ever
+ * opened. Pure module — also imported by Node tests.
  */
 
 function latin1(bytes, offset, length) {
@@ -19,6 +21,24 @@ function matches(bytes, offset, sig) {
 function findAscii(bytes, needle, limit = 512) {
   const hay = latin1(bytes, 0, Math.min(bytes.length, limit));
   return hay.indexOf(needle);
+}
+
+/** ISO-BMFF brand at bytes 8..12 (after the 4-byte size + 'ftyp'). */
+function ftypBrand(b) {
+  return latin1(b, 8, 4).toLowerCase();
+}
+
+/**
+ * MP3 frame-sync validation: 0xFF then sync bits, layer != invalid,
+ * bitrate index != invalid (prevents false positives on random binary).
+ */
+function looksLikeMp3Frame(b) {
+  if (b.length < 4) return false;
+  if (b[0] !== 0xff || (b[1] & 0xe0) !== 0xe0) return false;
+  const versionBits = (b[1] >> 3) & 0x03; // 1 = MPEG1, 2 = MPEG2, 0 = MPEG2.5
+  const layerBits = (b[1] >> 1) & 0x03;   // 1 = Layer III (mp3), 2 = II, 3 = I
+  if (versionBits === 1 || layerBits === 0) return false;
+  return (b[2] & 0xf0) !== 0xf0;          // bitrate index 1111 is invalid
 }
 
 /**
@@ -59,13 +79,25 @@ export function sniffType(bytes) {
     if (four === 'WAVE') return { ext: 'wav', mime: 'audio/wav', kind: 'audio' };
   }
   if (latin1(b, 4, 4) === 'ftyp') {
-    const brand = latin1(b, 8, 4).toLowerCase();
-    if (brand.startsWith('avi')) return { ext: 'avif', mime: 'image/avif', kind: 'image' };
-    if (brand.startsWith('hei') || brand.startsWith('mif1')) return { ext: 'heic', mime: 'image/heic', kind: 'image' };
-    if (brand === 'm4a ' || brand === 'm4b ') return { ext: 'm4a', mime: 'audio/mp4', kind: 'audio' };
+    const brand = ftypBrand(b);
+    // Compatible brands live after major brand + minor version (offset 16+).
+    const compat = latin1(b, 16, Math.min(b.length - 16, 48)).toLowerCase();
+    const avifCompat = /avif|avis|ma1[a-b]/.test(compat);
+    // AVIF: dedicated brands, or a HEIF container declaring AVIF compatibility.
+    if (brand.startsWith('avi') || (avifCompat && /^(mif|msf|miaf|mai)/.test(brand))) {
+      return { ext: 'avif', mime: 'image/avif', kind: 'image' };
+    }
+    // HEIC / HEIF: heic, heix, hevc, heim, heis, hevm, hevs + mif1 families.
+    if (brand.startsWith('hei') || brand.startsWith('mif') || brand.startsWith('msf') || brand === 'miaf') {
+      return { ext: 'heic', mime: 'image/heic', kind: 'image' };
+    }
+    if (brand === 'm4a ' || brand === 'm4b ' || brand === 'm4p ') {
+      return { ext: 'm4a', mime: 'audio/mp4', kind: 'audio' };
+    }
     return { ext: 'mp4', mime: 'video/mp4', kind: 'video' };
   }
   if (matches(b, 0, [0x1a, 0x45, 0xdf, 0xa3])) {
+    // EBML = WebM or Matroska. The DocType string sits in the first bytes.
     const isWebm = findAscii(b, 'webm', 64) >= 0;
     return isWebm
       ? { ext: 'webm', mime: 'video/webm', kind: 'video' }
@@ -90,7 +122,8 @@ export function sniffType(bytes) {
     }
     return { ext: 'zip', mime: 'application/zip', kind: 'archive' };
   }
-  if (latin1(b, 0, 3) === 'ID3' || (b[0] === 0xff && (b[1] & 0xe0) === 0xe0)) {
+  // MP3: ID3v2 container OR a valid raw MPEG audio frame sync.
+  if (latin1(b, 0, 3) === 'ID3' || looksLikeMp3Frame(b)) {
     return { ext: 'mp3', mime: 'audio/mpeg', kind: 'audio' };
   }
   if (latin1(b, 0, 4) === 'OggS') {

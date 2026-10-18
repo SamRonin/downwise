@@ -8,6 +8,7 @@ import { formatBytes, formatRelativeTime } from '../lib/format.js';
 import { OUTPUT_FORMATS } from '../converters/registry.js';
 import { CONVERSION_SIZE_LIMITS } from '../converters/index.js';
 import { i18nKeyForCode } from '../lib/errors.js';
+import { MSG } from '../lib/messages.js';
 import { VERSION } from '../lib/branding.js';
 import { icon, emptyIllustration } from './icons.js';
 import { applyTheme, nextTheme } from './theme.js';
@@ -188,7 +189,7 @@ function renderLangLabel() {
 
 async function loadState() {
   try {
-    const res = await chrome.runtime.sendMessage({ type: 'DW_GET_STATE' });
+    const res = await chrome.runtime.sendMessage({ type: MSG.GET_STATE });
     if (res?.ok) {
       state.jobs = res.jobs || [];
       state.hostAccess = Boolean(res.hostAccess);
@@ -199,7 +200,7 @@ async function loadState() {
 
 function subscribe() {
   chrome.runtime.onMessage.addListener((msg) => {
-    if (msg?.type === 'DW_JOBS_UPDATED' && Array.isArray(msg.jobs)) {
+    if (msg?.type === MSG.JOBS_UPDATED && Array.isArray(msg.jobs)) {
       state.jobs = msg.jobs;
       render();
     }
@@ -244,7 +245,7 @@ function bind() {
     state.clearArmed = false;
     btn.textContent = t(state.lang, 'popup.clearAll');
     try {
-      await chrome.runtime.sendMessage({ type: 'DW_CLEAR_HISTORY' });
+      await chrome.runtime.sendMessage({ type: MSG.CLEAR_HISTORY });
       toast(t(state.lang, 'popup.toastCleared'));
     } catch { /* ignore */ }
   });
@@ -272,19 +273,19 @@ function bind() {
     const { act, id } = btn.dataset;
     if (act === 'retry') {
       btn.disabled = true;
-      try { await chrome.runtime.sendMessage({ type: 'DW_RETRY', jobId: id }); } catch { /* ignore */ }
+      try { await chrome.runtime.sendMessage({ type: MSG.RETRY, jobId: id }); } catch { /* ignore */ }
     } else if (act === 'show') {
       const job = state.jobs.find((j) => j.id === id);
       if (job?.downloadId != null) chrome.downloads.show(job.downloadId);
     } else if (act === 'remove') {
-      try { await chrome.runtime.sendMessage({ type: 'DW_REMOVE_JOB', jobId: id }); } catch { /* ignore */ }
+      try { await chrome.runtime.sendMessage({ type: MSG.REMOVE_JOB, jobId: id }); } catch { /* ignore */ }
     } else if (act === 'grant') {
       try {
         const granted = await chrome.permissions.request({ origins: ['*://*/*'] });
         if (granted) {
           state.hostAccess = true;
           toast(t(state.lang, 'popup.toastAccessGranted'));
-          try { await chrome.runtime.sendMessage({ type: 'DW_RETRY', jobId: btn.closest('[data-job]')?.dataset.job }); } catch { /* ignore */ }
+          try { await chrome.runtime.sendMessage({ type: MSG.RETRY, jobId: btn.closest('[data-job]')?.dataset.job }); } catch { /* ignore */ }
         }
       } catch { /* ignore */ }
     }

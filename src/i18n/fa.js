@@ -10,6 +10,7 @@ export const fa = {
     parent: 'دان‌وایز — دانلود هوشمند',
     original: 'دانلود فایل اصلی',
     convertTo: 'دانلود به فرمت {format}',
+    captureFrame: 'ذخیرهٔ فریم به صورت {format}',
   },
 
   popup: {
@@ -93,6 +94,8 @@ export const fa = {
   notes: {
     animatedImage: 'تصویر متحرک است؛ فریم اول ذخیره می‌شود.',
     jpegFlatten: 'ناحیهٔ شفاف در JPEG سفید می‌شود.',
+    frameCapture: 'یک فریم از ویدیو به صورت عکس ثابت ذخیره شد.',
+    webmRealtime: 'رمزگذاری WebM/Opus به‌صورت زنده انجام می‌شود؛ زمان فرآیند تقریباً برابر مدت صدا بود.',
   },
 
   options: {
@@ -119,6 +122,14 @@ export const fa = {
     download: {
       quality: 'کیفیت تبدیل JPEG/WebP',
       qualityHint: 'کیفیت بالاتر یعنی فایل بزرگ‌تر؛ روی PNG اثری ندارد.',
+      defaultImageTarget: 'فرمت ترجیحی تصویر',
+      defaultImageTargetDesc: 'این فرمت در منوی راست‌کلیک تصاویر و ویدیوها در صدر فهرست قرار می‌گیرد.',
+      audioBitrate: 'بیت‌ریت صدای WebM (Opus)',
+      audioBitrateDesc: 'بیت‌ریت تبدیل صدای فشرده؛ ۱۲۸ کیلوبیت بر ثانیه انتخاب متعادلی است.',
+      saveAs: 'پرسیدن محل ذخیره برای هر فایل',
+      saveAsDesc: 'روشن: کروم هر بار محل ذخیره را می‌پرسد. خاموش: فایل‌ها خودکار در پوشهٔ پیش‌فرض ذخیره می‌شوند.',
+      contextMenus: 'دان‌وایز در منوی راست‌کلیک',
+      contextMenusDesc: 'خاموش کنید تا زیرمنوی دان‌وایز از منوی راست‌کلیک مرورگر حذف شود.',
       notifications: 'اعلان‌های سیستم',
       notificationsDesc: 'پایان یا شکست دانلود اعلان شود.',
     },

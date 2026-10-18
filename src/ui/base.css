@@ -4,12 +4,23 @@
    logical properties everywhere so a single stylesheet serves both dirs.
    ========================================================================== */
 
+/*
+ * Font loading is subsetted at the CSS level with `unicode-range`:
+ * the browser only downloads a face when the page actually renders
+ * characters inside its declared range. Persian pages (data-lang="fa")
+ * never need Inter's file and English pages never need Vazirmatn's —
+ * roughly 160 KB of the package stays on disk per language.
+ * (The woff2 binaries themselves stay untouched — no build step.)
+ * Licenses: assets/fonts/OFL-Vazirmatn.txt, assets/fonts/OFL-Inter.txt
+ */
 @font-face {
   font-family: 'Vazirmatn';
   src: url('../../assets/fonts/Vazirmatn-Variable.woff2') format('woff2-variations');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
+  /* Arabic script + Persian digits/symbols (+ U+200C ZWNJ used by فارسی) */
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200D, U+2010-2011, U+06F0-06F9;
 }
 @font-face {
   font-family: 'Inter';
@@ -17,14 +28,21 @@
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
+  /* Basic + Extended Latin, punctuation, digits and typographic symbols */
+  unicode-range: U+0000-00FF, U+0100-024F, U+0300-036F, U+1E00-1EFF, U+2000-206F, U+2070-209F, U+20A0-20CF, U+2190-21FF, U+2212, U+25A0-25FF, U+2C60-2C7F;
 }
 
 /* ------------------------------------------------------------------ tokens */
 
 :root {
-  --font-fa: 'Vazirmatn', 'Tahoma', 'Segoe UI', sans-serif;
-  --font-en: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --font-body: var(--font-fa), var(--font-en);
+  /*
+   * Script-aware stacks: with the unicode-range declarations above each
+   * family only claims its own script, so mixed Persian/Latin text flows
+   * Vazirmatn → Inter seamlessly while each file loads only when needed.
+   */
+  --font-fa: 'Vazirmatn', 'Inter', 'Tahoma', 'Segoe UI', sans-serif;
+  --font-en: 'Inter', 'Vazirmatn', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Inter', 'Vazirmatn', 'Tahoma', 'Segoe UI', sans-serif;
 
   /* light theme (default) */
   --bg: #f5f7f6;

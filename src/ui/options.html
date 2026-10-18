@@ -91,6 +91,64 @@
 
         <div class="setting-row">
           <div class="setting-text">
+            <h3 class="setting-label" data-i18n="options.download.defaultImageTarget"></h3>
+            <p class="setting-hint" data-i18n="options.download.defaultImageTargetDesc"></p>
+          </div>
+        </div>
+        <div class="seg-group" role="radiogroup" aria-label="default image format" id="image-target-group">
+          <button class="seg-btn" data-image-target="webp" role="radio">WebP</button>
+          <button class="seg-btn" data-image-target="png" role="radio">PNG</button>
+          <button class="seg-btn" data-image-target="jpeg" role="radio">JPEG</button>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="setting-row">
+          <div class="setting-text">
+            <h3 class="setting-label" data-i18n="options.download.audioBitrate"></h3>
+            <p class="setting-hint" data-i18n="options.download.audioBitrateDesc"></p>
+          </div>
+          <label class="select-wrap">
+            <select id="audio-bitrate" aria-label="audio bitrate">
+              <option value="64">64 kbps</option>
+              <option value="96">96 kbps</option>
+              <option value="128">128 kbps</option>
+              <option value="192">192 kbps</option>
+              <option value="256">256 kbps</option>
+            </select>
+          </label>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="setting-row">
+          <div class="setting-text">
+            <h3 class="setting-label" data-i18n="options.download.saveAs"></h3>
+            <p class="setting-hint" data-i18n="options.download.saveAsDesc"></p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="save-as-toggle" />
+            <span class="track"><span class="thumb"></span></span>
+          </label>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="setting-row">
+          <div class="setting-text">
+            <h3 class="setting-label" data-i18n="options.download.contextMenus"></h3>
+            <p class="setting-hint" data-i18n="options.download.contextMenusDesc"></p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="context-menus-toggle" />
+            <span class="track"><span class="thumb"></span></span>
+          </label>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="setting-row">
+          <div class="setting-text">
             <h3 class="setting-label" data-i18n="options.download.notifications"></h3>
             <p class="setting-hint" data-i18n="options.download.notificationsDesc"></p>
           </div>
