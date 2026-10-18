@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "DownWise — Smart File Downloader",
+    "description": "Extension display name"
+  },
+  "extDesc": {
+    "message": "Right-click smart downloads with real format conversion for images & audio.",
+    "description": "Extension description (max 132 chars)"
+  }
+}

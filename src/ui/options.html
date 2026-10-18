@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="auto" data-lang="fa">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DownWise — تنظیمات</title>
+  <link rel="stylesheet" href="base.css" />
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body class="options">
+
+  <div class="shell">
+
+    <aside class="sidebar">
+      <div class="side-brand">
+        <img src="../../assets/icons/icon-48.png" alt="" width="34" height="34" />
+        <div>
+          <div class="side-name" data-i18n="app.name">دان‌وایز</div>
+          <div class="side-sub" data-i18n="options.title"></div>
+        </div>
+      </div>
+      <nav class="side-nav" aria-label="settings sections">
+        <button class="nav-item active" data-section="appearance"><span class="nav-icon" data-icon="sun"></span><span data-i18n="options.nav.appearance"></span></button>
+        <button class="nav-item" data-section="language"><span class="nav-icon" data-icon="languages"></span><span data-i18n="options.nav.language"></span></button>
+        <button class="nav-item" data-section="download"><span class="nav-icon" data-icon="download"></span><span data-i18n="options.nav.download"></span></button>
+        <button class="nav-item" data-section="permissions"><span class="nav-icon" data-icon="shieldCheck"></span><span data-i18n="options.nav.permissions"></span></button>
+        <button class="nav-item" data-section="history"><span class="nav-icon" data-icon="history"></span><span data-i18n="options.nav.history"></span></button>
+        <button class="nav-item" data-section="about"><span class="nav-icon" data-icon="info"></span><span data-i18n="options.nav.about"></span></button>
+      </nav>
+    </aside>
+
+    <main class="content">
+
+      <!-- Appearance -->
+      <section class="section" id="section-appearance">
+        <h2 class="section-title" data-i18n="options.theme.label"></h2>
+        <p class="section-desc" data-i18n="options.theme.desc"></p>
+        <div class="theme-cards" role="radiogroup" aria-label="theme">
+          <button class="theme-card" data-theme-choice="auto" role="radio">
+            <span class="mini-preview auto"><span class="mp-bar"></span><span class="mp-line"></span><span class="mp-line short"></span></span>
+            <span class="tc-label" data-i18n="options.theme.auto"></span>
+            <span class="tc-check"></span>
+          </button>
+          <button class="theme-card" data-theme-choice="light" role="radio">
+            <span class="mini-preview light"><span class="mp-bar"></span><span class="mp-line"></span><span class="mp-line short"></span></span>
+            <span class="tc-label" data-i18n="options.theme.light"></span>
+            <span class="tc-check"></span>
+          </button>
+          <button class="theme-card" data-theme-choice="dark" role="radio">
+            <span class="mini-preview dark"><span class="mp-bar"></span><span class="mp-line"></span><span class="mp-line short"></span></span>
+            <span class="tc-label" data-i18n="options.theme.dark"></span>
+            <span class="tc-check"></span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Language -->
+      <section class="section" id="section-language" hidden>
+        <h2 class="section-title" data-i18n="options.language.label"></h2>
+        <p class="section-desc" data-i18n="options.language.desc"></p>
+        <div class="lang-cards" role="radiogroup" aria-label="language">
+          <button class="lang-card" data-lang-choice="fa" role="radio">
+            <span class="lc-sample">آ ب پ</span>
+            <span class="lc-name">فارسی</span>
+            <span class="lc-dir">RTL</span>
+            <span class="tc-check"></span>
+          </button>
+          <button class="lang-card" data-lang-choice="en" role="radio">
+            <span class="lc-sample">A B C</span>
+            <span class="lc-name">English</span>
+            <span class="lc-dir">LTR</span>
+            <span class="tc-check"></span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Download -->
+      <section class="section" id="section-download" hidden>
+        <div class="setting-row">
+          <div class="setting-text">
+            <h3 class="setting-label" data-i18n="options.download.quality"></h3>
+            <p class="setting-hint" data-i18n="options.download.qualityHint"></p>
+          </div>
+        </div>
+        <div class="quality-row">
+          <input type="range" id="quality-range" min="50" max="100" step="1" value="92" aria-label="quality" />
+          <output id="quality-output" class="num">92%</output>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="setting-row">
+          <div class="setting-text">
+            <h3 class="setting-label" data-i18n="options.download.notifications"></h3>
+            <p class="setting-hint" data-i18n="options.download.notificationsDesc"></p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="notifications-toggle" />
+            <span class="track"><span class="thumb"></span></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Permissions -->
+      <section class="section" id="section-permissions" hidden>
+        <div class="perm-card" id="perm-card">
+          <div class="perm-card-icon" id="perm-card-icon"></div>
+          <div class="perm-card-text">
+            <h3 class="setting-label" id="perm-state-label"></h3>
+            <p class="setting-hint" id="perm-state-desc"></p>
+            <p class="setting-hint how-used" data-i18n="options.permissions.howUsed"></p>
+          </div>
+        </div>
+        <div class="perm-actions">
+          <button class="btn btn-primary" id="btn-grant" data-icon-btn="shieldCheck"><span data-i18n="options.permissions.grant"></span></button>
+          <button class="btn btn-danger" id="btn-revoke" data-icon-btn="x"><span data-i18n="options.permissions.revoke"></span></button>
+        </div>
+      </section>
+
+      <!-- History -->
+      <section class="section" id="section-history" hidden>
+        <div class="setting-row">
+          <div class="setting-text">
+            <h3 class="setting-label" data-i18n="options.history.label"></h3>
+            <p class="setting-hint" data-i18n="options.history.desc"></p>
+          </div>
+        </div>
+        <div class="history-row">
+          <span class="chip" id="history-count"><span class="num" id="history-count-num">0</span></span>
+          <button class="btn btn-danger" id="btn-clear-history"><span data-i18n="options.history.clear"></span></button>
+        </div>
+      </section>
+
+      <!-- About -->
+      <section class="section" id="section-about" hidden>
+        <div class="about-hero">
+          <img src="../../assets/icons/icon-128.png" alt="DownWise logo" width="64" height="64" />
+          <div>
+            <div class="about-name" data-i18n="app.name"></div>
+            <div class="about-tag" data-i18n="app.tagline"></div>
+          </div>
+        </div>
+        <ul class="about-list">
+          <li><span data-i18n="options.about.version"></span><b class="num" id="about-version"></b></li>
+          <li><span data-i18n="options.about.license"></span><b>MIT</b></li>
+          <li><a id="link-repo" target="_blank" rel="noopener noreferrer"><span data-i18n="options.about.repo"></span><span class="link-icon" data-icon="external"></span></a></li>
+          <li><a id="link-issues" target="_blank" rel="noopener noreferrer"><span data-i18n="options.about.issues"></span><span class="link-icon" data-icon="external"></span></a></li>
+          <li><a id="link-privacy" target="_blank" rel="noopener noreferrer"><span data-i18n="options.about.privacy"></span><span class="link-icon" data-icon="external"></span></a></li>
+        </ul>
+        <p class="made-with"><span data-i18n="options.about.madeWith"></span></p>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

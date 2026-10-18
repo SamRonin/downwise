@@ -1,0 +1,74 @@
+/* ==========================================================================
+   DownWise permission grant page
+   ========================================================================== */
+
+body.grant {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* soft background orbs */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+.orb-1 { width: 340px; height: 340px; background: #34d399; top: -110px; inset-inline-end: -80px; }
+.orb-2 { width: 300px; height: 300px; background: #0d9488; bottom: -100px; inset-inline-start: -70px; opacity: 0.25; }
+
+.grant-card {
+  position: relative;
+  z-index: 1;
+  width: 400px;
+  max-width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-2);
+  padding: 30px 28px 26px;
+  text-align: center;
+}
+
+.grant-icon {
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 16px;
+  border-radius: 18px;
+  background: var(--grad);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.4);
+}
+
+.grant-card h1 { font-size: 17px; font-weight: 800; margin-bottom: 10px; }
+
+.grant-desc { font-size: 13px; color: var(--text-2); line-height: 1.8; margin-bottom: 8px; }
+.grant-desc.muted { color: var(--muted); font-size: 12px; }
+
+.grant-allow { width: 100%; margin-top: 16px; min-height: 42px; font-size: 14px; }
+
+.grant-success {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 16px;
+  color: var(--success);
+  font-weight: 800;
+  font-size: 13.5px;
+  animation: fade-slide-in 0.3s ease both;
+}
+.grant-success[hidden] { display: none; }
+
+.theme-anim, .theme-anim * {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease !important;
+}

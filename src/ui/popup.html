@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="auto" data-lang="fa">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DownWise</title>
+  <link rel="stylesheet" href="base.css" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body class="popup">
+  <div class="app" id="app">
+
+    <header class="app-header">
+      <div class="brand">
+        <img class="brand-logo" src="../../assets/icons/icon-48.png" alt="" width="38" height="38" />
+        <div class="brand-text">
+          <h1 class="brand-name" data-i18n="app.name">دان‌وایز</h1>
+          <p class="brand-tagline" data-i18n="app.tagline"></p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-lang" class="icon-btn lang-btn" data-i18n-attrs="title:popup.langTitle;aria-label:popup.langTitle">
+          <span id="lang-label" class="lang-label">EN</span>
+        </button>
+        <button id="btn-theme" class="icon-btn" data-i18n-attrs="title:popup.themeTitle;aria-label:popup.themeTitle"></button>
+      </div>
+    </header>
+
+    <button id="perm-chip" class="perm-chip" hidden></button>
+
+    <main class="app-main">
+
+      <section id="active-panel" class="panel" hidden>
+        <h2 class="panel-title">
+          <span data-i18n="popup.activeSection"></span>
+          <span id="active-count" class="count-badge num" hidden></span>
+        </h2>
+        <div id="active-list" class="job-list" aria-live="polite"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title"><span data-i18n="popup.historySection"></span></h2>
+          <button id="btn-clear" class="text-btn danger" data-i18n="popup.clearAll"></button>
+        </div>
+        <div id="history-list" class="job-list"></div>
+        <div id="empty-state" class="empty">
+          <div class="empty-art" id="empty-art"></div>
+          <p class="empty-title" data-i18n="popup.emptyTitle"></p>
+          <p class="empty-hint" data-i18n="popup.emptyHint"></p>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="app-footer">
+      <button id="btn-options" class="ghost-btn">
+        <span class="btn-icon" id="options-icon"></span>
+        <span data-i18n="popup.settings"></span>
+      </button>
+      <span class="version num" id="version-label"></span>
+    </footer>
+
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

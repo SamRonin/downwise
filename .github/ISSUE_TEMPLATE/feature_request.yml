@@ -1,0 +1,69 @@
+name: ✨ Feature request
+description: Suggest an idea or improvement for DownWise.
+title: "[feature] "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideas are welcome! Two things shape what DownWise will accept:
+
+        1. **Honest conversions only** — a format can be offered only if a real encoder exists
+           (Chromium canvas encodes PNG/JPEG/WebP; DownWise encodes WAV itself). “Convert MP4 to
+           MP3 by renaming” requests will be declined; “bundle ffmpeg to transcode video” conflicts
+           with the no-build / no-remote-code stance, so think carefully before proposing it.
+        2. **Local-only privacy** — no features that phone home or require a backend.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What are you trying to achieve, and what's currently hard or impossible?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should happen, concretely? UI sketches are a plus.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other ways you've tried or considered solving this.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area does it belong to?
+      options:
+        - Conversion (image)
+        - Conversion (audio)
+        - Download / recovery of originals
+        - Popup UI
+        - Options page
+        - Permissions / site access UX
+        - Localization (new language, RTL, typography)
+        - Documentation
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Feasibility self-check
+      description: These reflect the project's core principles — see CONTRIBUTING.md.
+      options:
+        - label: This does not require a backend/server and sends no data anywhere
+          required: true
+        - label: If it's a new conversion format, a real browser-side encoder exists for it
+          required: true
+        - label: I checked existing feature requests for duplicates
+          required: true

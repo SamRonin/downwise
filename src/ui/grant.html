@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="auto" data-lang="fa">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DownWise</title>
+  <link rel="stylesheet" href="base.css" />
+  <link rel="stylesheet" href="grant.css" />
+</head>
+<body class="grant">
+  <div class="orb orb-1" aria-hidden="true"></div>
+  <div class="orb orb-2" aria-hidden="true"></div>
+
+  <main class="grant-card enter" role="dialog" aria-labelledby="grant-title">
+    <div class="grant-icon" id="grant-icon"></div>
+    <h1 id="grant-title" data-i18n="grant.title"></h1>
+    <p class="grant-desc" data-i18n="grant.desc1"></p>
+    <p class="grant-desc muted" data-i18n="grant.desc2"></p>
+    <button class="btn btn-primary grant-allow" id="btn-allow"></button>
+    <p class="grant-success" id="grant-success" hidden>
+      <span id="grant-success-icon"></span>
+      <span data-i18n="grant.granted"></span>
+    </p>
+  </main>
+
+  <script type="module" src="grant.js"></script>
+</body>
+</html>

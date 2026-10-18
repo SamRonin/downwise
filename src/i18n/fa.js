@@ -1,0 +1,162 @@
+/**
+ * Persian (default) UI dictionary.
+ * Keys MUST stay in sync with en.js — enforced by tests/i18n.test.js
+ */
+export const fa = {
+  meta: { code: 'fa', languageName: 'فارسی', dir: 'rtl' },
+  app: { name: 'دان‌وایز', tagline: 'دانلود هوشمند و تبدیل فایل' },
+
+  menu: {
+    parent: 'دان‌وایز — دانلود هوشمند',
+    original: 'دانلود فایل اصلی',
+    convertTo: 'دانلود به فرمت {format}',
+  },
+
+  popup: {
+    activeSection: 'در حال انجام',
+    historySection: 'تاریخچه',
+    emptyTitle: 'هنوز چیزی دانلود نشده',
+    emptyHint: 'روی هر تصویر، ویدیو یا فایل راست‌کلیک کنید و «دان‌وایز» را انتخاب کنید.',
+    clearAll: 'پاک‌سازی',
+    clearConfirm: 'مطمئنید؟',
+    clearYes: 'بله، پاک کن',
+    settings: 'تنظیمات',
+    restrictedMode: 'حالت محدود',
+    restrictedHint: 'برای تبدیل فرمت، دسترسی سایت را فعال کنید',
+    fullAccess: 'دسترسی کامل فعال',
+    fullAccessHint: 'تبدیل فرمت در همهٔ سایت‌ها',
+    grantAccess: 'فعال‌سازی دسترسی',
+    retry: 'تلاش دوباره',
+    showFolder: 'نمایش در پوشه',
+    remove: 'حذف از تاریخچه',
+    originalTag: 'اصلی',
+    themeTitle: 'پوسته: خودکار ← روشن ← تاریک',
+    langTitle: 'تغییر زبان (فارسی ⇄ English)',
+    toastCleared: 'تاریخچه پاک شد',
+    toastAccessGranted: 'دسترسی کامل فعال شد',
+    toastAccessFailed: 'فعال‌سازی دسترسی انجام نشد',
+  },
+
+  status: {
+    queued: 'در صف',
+    preparing: 'آماده‌سازی',
+    fetching: 'دریافت فایل',
+    converting: 'تبدیل',
+    saving: 'ذخیره',
+    downloading: 'دانلود',
+    completed: 'انجام شد',
+    failed: 'ناموفق',
+    canceled: 'لغو شد',
+    action_required: 'نیاز به دسترسی',
+  },
+
+  kind: {
+    image: 'تصویر',
+    video: 'ویدیو',
+    audio: 'صدا',
+    document: 'سند',
+    archive: 'فایل فشرده',
+    html: 'صفحهٔ وب',
+    stream: 'استریم',
+    other: 'فایل',
+  },
+
+  errors: {
+    NETWORK: 'خطای شبکه؛ اتصال اینترنت یا سرور در دسترس نیست.',
+    HTTP: 'سرور پاسخ خطا داد (کد {status}).',
+    CORS: 'دسترسی به فایل توسط سایت مسدود شد (CORS).',
+    HTML_RESPONSE: 'به‌جای فایل، صفحهٔ وب برگشت؛ احتمالاً فایل محافظت‌شده یا نیازمند ورود است.',
+    RECOVERY_FAILED: 'منبع اصلی در صفحه پیدا نشد؛ فایل از این نشانی در دسترس نیست.',
+    UNSUPPORTED_STREAM: 'استریم‌های HLS/DASH و ویدیوهای MSE پشتیبانی نمی‌شوند.',
+    UNSUPPORTED_SCHEME: 'این نوع نشانی (فایل محلی یا صفحات داخلی مرورگر) پشتیبانی نمی‌شود.',
+    FILE_TOO_LARGE: 'فایل بزرگ‌تر از حد مجاز (۲۵۰ مگابایت) است.',
+    TOO_LARGE_FOR_CONVERSION: 'برای تبدیل، فایل باید کوچک‌تر از {limit} باشد؛ فایل اصلی را دانلود کنید.',
+    CONVERSION_FAILED: 'تبدیل فایل ممکن نشد.',
+    DECODE_FAILED: 'رمزگشایی فایل صوتی ممکن نشد؛ این فرمت برای تبدیل پشتیبانی نمی‌شود.',
+    DOWNLOAD_FAILED: 'دانلود ناتمام ماند. دوباره تلاش کنید.',
+    PERMISSION_REQUIRED: 'برای این عملیات، دسترسی سایت لازم است.',
+    KIND_MISMATCH: 'این فایل از نوعی است که به فرمت خواسته‌شده تبدیل نمی‌شود.',
+    OFFSCREEN_FAILED: 'پردازش داخلی شکست خورد.',
+    INVALID_INPUT: 'نشانی فایل نامعتبر است.',
+    UNKNOWN: 'خطای ناشناخته‌ای رخ داد.',
+  },
+
+  notify: {
+    doneTitle: 'دانلود کامل شد',
+    doneBody: '«{name}» ذخیره شد.',
+    failTitle: 'دانلود ناموفق بود',
+    failBody: '{name}: {reason}',
+    permTitle: 'دسترسی لازم است',
+    permBody: 'برای تبدیل فرمت، دسترسی سایت را از پنجرهٔ دان‌وایز فعال کنید.',
+  },
+
+  notes: {
+    animatedImage: 'تصویر متحرک است؛ فریم اول ذخیره می‌شود.',
+    jpegFlatten: 'ناحیهٔ شفاف در JPEG سفید می‌شود.',
+  },
+
+  options: {
+    title: 'تنظیمات دان‌وایز',
+    nav: {
+      appearance: 'ظاهر',
+      language: 'زبان',
+      download: 'دانلود',
+      permissions: 'دسترسی‌ها',
+      history: 'تاریخچه',
+      about: 'درباره',
+    },
+    theme: {
+      label: 'پوسته',
+      desc: 'روشن، تاریک یا هماهنگ با سیستم‌عامل.',
+      auto: 'خودکار',
+      light: 'روشن',
+      dark: 'تاریک',
+    },
+    language: {
+      label: 'زبان رابط',
+      desc: 'فارسی (راست‌چین) یا English (چپ‌چین). همهٔ بخش‌ها بلافاصله تغییر می‌کنند.',
+    },
+    download: {
+      quality: 'کیفیت تبدیل JPEG/WebP',
+      qualityHint: 'کیفیت بالاتر یعنی فایل بزرگ‌تر؛ روی PNG اثری ندارد.',
+      notifications: 'اعلان‌های سیستم',
+      notificationsDesc: 'پایان یا شکست دانلود اعلان شود.',
+    },
+    permissions: {
+      label: 'دسترسی به سایت‌ها',
+      granted: 'دسترسی کامل فعال است',
+      grantedDesc: 'تبدیل فرمت در همهٔ سایت‌ها کار می‌کند.',
+      notGranted: 'حالت محدود',
+      notGrantedDesc: 'دانلود مستقیم همه‌جا کار می‌کند؛ اما تبدیل فرمت به دسترسی خواندن فایل نیاز دارد.',
+      grant: 'فعال‌سازی دسترسی',
+      revoke: 'لغو دسترسی',
+      howUsed: 'این دسترسی فقط هنگام درخواست شما، برای دریافت فایل استفاده می‌شود؛ هیچ داده‌ای جمع‌آوری یا ارسال نمی‌شود.',
+    },
+    history: {
+      label: 'تاریخچهٔ دانلود',
+      desc: 'فهرست فعالیت‌ها فقط روی همین مرورگر ذخیره می‌شود.',
+      count: '{n} مورد',
+      clear: 'پاک‌سازی تاریخچه',
+      cleared: 'تاریخچه پاک شد',
+    },
+    about: {
+      label: 'درباره',
+      version: 'نسخه',
+      license: 'مجوز MIT — متن‌باز',
+      repo: 'مخزن GitHub',
+      issues: 'گزارش اشکال و پیشنهاد',
+      privacy: 'سیاست حریم خصوصی',
+      madeWith: 'ساخته‌شده با ♥ برای جامعهٔ متن‌باز',
+    },
+    saved: 'ذخیره شد',
+  },
+
+  grant: {
+    title: 'اجازهٔ دسترسی به سایت‌ها',
+    desc1: 'دان‌وایز برای تبدیل فرمت باید بتواند محتوای فایل انتخابی را بخواند.',
+    desc2: 'هیچ داده‌ای جمع‌آوری یا ارسال نمی‌شود؛ همه‌چیز فقط روی مرورگر شما می‌ماند.',
+    allow: 'فعال‌سازی دسترسی',
+    granted: 'دسترسی فعال شد',
+    close: 'بستن',
+  },
+};

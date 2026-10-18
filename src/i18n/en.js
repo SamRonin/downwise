@@ -1,0 +1,162 @@
+/**
+ * English UI dictionary.
+ * Keys MUST stay in sync with fa.js — enforced by tests/i18n.test.js
+ */
+export const en = {
+  meta: { code: 'en', languageName: 'English', dir: 'ltr' },
+  app: { name: 'DownWise', tagline: 'Smart downloads & real file conversion' },
+
+  menu: {
+    parent: 'DownWise — Smart Download',
+    original: 'Download original file',
+    convertTo: 'Download as {format}',
+  },
+
+  popup: {
+    activeSection: 'In progress',
+    historySection: 'History',
+    emptyTitle: 'Nothing downloaded yet',
+    emptyHint: 'Right-click any image, video or file and pick “DownWise”.',
+    clearAll: 'Clear',
+    clearConfirm: 'Are you sure?',
+    clearYes: 'Yes, clear it',
+    settings: 'Settings',
+    restrictedMode: 'Limited mode',
+    restrictedHint: 'Enable site access to convert formats',
+    fullAccess: 'Full access enabled',
+    fullAccessHint: 'Format conversion works on all sites',
+    grantAccess: 'Enable access',
+    retry: 'Retry',
+    showFolder: 'Show in folder',
+    remove: 'Remove from history',
+    originalTag: 'Original',
+    themeTitle: 'Theme: auto → light → dark',
+    langTitle: 'Switch language (فارسی ⇄ English)',
+    toastCleared: 'History cleared',
+    toastAccessGranted: 'Full access enabled',
+    toastAccessFailed: 'Could not enable access',
+  },
+
+  status: {
+    queued: 'Queued',
+    preparing: 'Preparing',
+    fetching: 'Fetching',
+    converting: 'Converting',
+    saving: 'Saving',
+    downloading: 'Downloading',
+    completed: 'Completed',
+    failed: 'Failed',
+    canceled: 'Canceled',
+    action_required: 'Access needed',
+  },
+
+  kind: {
+    image: 'Image',
+    video: 'Video',
+    audio: 'Audio',
+    document: 'Document',
+    archive: 'Archive',
+    html: 'Web page',
+    stream: 'Stream',
+    other: 'File',
+  },
+
+  errors: {
+    NETWORK: 'Network error — the connection or server is unreachable.',
+    HTTP: 'The server responded with an error (status {status}).',
+    CORS: 'Access to the file was blocked by the site (CORS).',
+    HTML_RESPONSE: 'A web page was returned instead of the file; it is probably protected or requires login.',
+    RECOVERY_FAILED: 'No usable source found on the page; the file is not accessible at this URL.',
+    UNSUPPORTED_STREAM: 'HLS/DASH streams and MSE videos are not supported.',
+    UNSUPPORTED_SCHEME: 'This URL type (local files or internal browser pages) is not supported.',
+    FILE_TOO_LARGE: 'The file exceeds the 250 MB limit.',
+    TOO_LARGE_FOR_CONVERSION: 'Files must be under {limit} for conversion; download the original instead.',
+    CONVERSION_FAILED: 'The file could not be converted.',
+    DECODE_FAILED: 'Audio decoding failed; this format is not supported for conversion.',
+    DOWNLOAD_FAILED: 'The download did not finish. Try again.',
+    PERMISSION_REQUIRED: 'Site access is required for this action.',
+    KIND_MISMATCH: 'This file is not of a type that can be converted to the requested format.',
+    OFFSCREEN_FAILED: 'Internal processing failed.',
+    INVALID_INPUT: 'The file URL is invalid.',
+    UNKNOWN: 'An unexpected error occurred.',
+  },
+
+  notify: {
+    doneTitle: 'Download complete',
+    doneBody: '“{name}” was saved.',
+    failTitle: 'Download failed',
+    failBody: '{name}: {reason}',
+    permTitle: 'Permission required',
+    permBody: 'Enable site access from the DownWise popup to convert formats.',
+  },
+
+  notes: {
+    animatedImage: 'Animated image — only the first frame is saved.',
+    jpegFlatten: 'Transparent areas become white in JPEG.',
+  },
+
+  options: {
+    title: 'DownWise Settings',
+    nav: {
+      appearance: 'Appearance',
+      language: 'Language',
+      download: 'Download',
+      permissions: 'Permissions',
+      history: 'History',
+      about: 'About',
+    },
+    theme: {
+      label: 'Theme',
+      desc: 'Light, dark, or follow your operating system.',
+      auto: 'Auto',
+      light: 'Light',
+      dark: 'Dark',
+    },
+    language: {
+      label: 'Interface language',
+      desc: 'فارسی (RTL) or English (LTR). Every part of the UI updates instantly.',
+    },
+    download: {
+      quality: 'JPEG/WebP conversion quality',
+      qualityHint: 'Higher quality means larger files; no effect on PNG.',
+      notifications: 'System notifications',
+      notificationsDesc: 'Notify when a download finishes or fails.',
+    },
+    permissions: {
+      label: 'Site access',
+      granted: 'Full access enabled',
+      grantedDesc: 'Format conversion works on all sites.',
+      notGranted: 'Limited mode',
+      notGrantedDesc: 'Direct downloads work everywhere, but format conversion needs file-read access.',
+      grant: 'Enable access',
+      revoke: 'Revoke access',
+      howUsed: 'This access is only used to fetch files at your request; nothing is collected or sent anywhere.',
+    },
+    history: {
+      label: 'Download history',
+      desc: 'Activity list is stored locally in this browser only.',
+      count: '{n} items',
+      clear: 'Clear history',
+      cleared: 'History cleared',
+    },
+    about: {
+      label: 'About',
+      version: 'Version',
+      license: 'MIT License — open source',
+      repo: 'GitHub repository',
+      issues: 'Report an issue',
+      privacy: 'Privacy policy',
+      madeWith: 'Made with ♥ for the open-source community',
+    },
+    saved: 'Saved',
+  },
+
+  grant: {
+    title: 'Allow site access',
+    desc1: 'DownWise needs to read the selected file’s content in order to convert it.',
+    desc2: 'Nothing is collected or sent anywhere — everything stays in your browser.',
+    allow: 'Enable access',
+    granted: 'Access enabled',
+    close: 'Close',
+  },
+};

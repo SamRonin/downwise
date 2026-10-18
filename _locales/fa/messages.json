@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "دان‌وایز — دانلود هوشمند فایل",
+    "description": "Extension display name"
+  },
+  "extDesc": {
+    "message": "دانلود هوشمند با کلیک راست و تبدیل واقعی فرمت تصاویر و صداها.",
+    "description": "Extension description (max 132 chars)"
+  }
+}

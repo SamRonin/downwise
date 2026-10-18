@@ -1,0 +1,95 @@
+name: 🐞 Bug report
+description: Something in DownWise didn't work as documented — tell us exactly what.
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug! Please fill in every required field —
+        console messages from the service worker are the single most useful thing you can
+        attach (`chrome://extensions` → DownWise → **service worker** link).
+
+        ⚠️ Found a *security* vulnerability? Do **not** open a public issue — see
+        [SECURITY.md](../../SECURITY.md) for private reporting.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, including what you expected to happen instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Precise steps, starting from a fresh state if possible.
+      placeholder: |
+        1. Right-click an image on …
+        2. Choose “DownWise — Smart Download” → …
+        3. …
+    validations:
+      required: true
+
+  - type: input
+    id: url-example
+    attributes:
+      label: Example URL or page type
+      description: >
+        A public URL that reproduces it, or the kind of page (login-walled image, HLS link,
+        blob: URL, …). **Never paste private/authenticated URLs or credentials.**
+      placeholder: "https://example.com/image.avif  (or: 'an audio blob: URL on a video site')"
+    validations:
+      required: true
+
+  - type: input
+    id: browser-version
+    attributes:
+      label: Browser and version
+      description: Exact browser and version — e.g. Chrome 131.0.6778.86 (or Edge/Brave + version).
+      placeholder: Chrome 131.0.6778.86 (64-bit)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of DownWise?
+      options:
+        - Context menu
+        - Download (original file)
+        - Conversion — image
+        - Conversion — audio
+        - Popup UI
+        - Options page
+        - Permissions / site access
+        - Notifications
+        - Localization (fa/en or RTL)
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Console messages from the service worker
+      description: >
+        Open chrome://extensions → enable Developer mode → DownWise → “service worker” →
+        copy any red/warning messages shown when the bug happens.
+      render: shell
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked existing issues for duplicates
+          required: true
+        - label: I'm on DownWise 1.0.x with a Chromium browser ≥ 116
+          required: true
+        - label: This is not a security vulnerability (those go to SECURITY.md privately)
+          required: true
